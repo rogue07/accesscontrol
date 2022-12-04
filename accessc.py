@@ -2,6 +2,7 @@
 
 #Ram
 #10 sep 2022
+#rogue7.ram@gmail.com
 #My attempt at an access control system.
 
 
@@ -9,23 +10,35 @@ import logging
 import os 
 import time
 import sys
-import csv
 import board
 import busio
 import subprocess
 import select
 import keyboard
 import mysql.connector
-import schedule
 import RPi.GPIO as GPIO
 from digitalio import DigitalInOut
 from adafruit_pn532.spi import PN532_SPI
 from sh import tail
-from datetime import date
+from datetime import datetime
+from crontab import CronTab
+
+import os.path
+
+# file to check
+logfile = 'accessc.log'
+
+os.system('clear')
+sz = os.path.getsize(logfile)
+print(f'The {logfile} size is', sz, 'bytes')
+time.sleep(3)
 
 
 # log to accessc.log
-logging.basicConfig(filename="accessc.log", level=logging.INFO)
+logging.basicConfig(filename="accessc.log", format='%(asctime)s %(levelname)-8s %(message)s', level=logging.INFO, datefmt='%Y-%m-%d %H:%M:%S')
+
+
+#logging.basicConfig(filename="accessc.log", level=logging.INFO)
 
 #Main menu
 def menu():
@@ -47,7 +60,7 @@ def user_add():
         return
     else:
         print(fname)
-        time.sleep(2)
+        time.sleep(1)
 
     lname = input('Enter last name: ').lower()
     if fname == '':    
@@ -56,7 +69,7 @@ def user_add():
         return
     else:
         print(lname)
-        time.sleep(2)
+        time.sleep(1)
 
     logging.info(f'{fname, lname} was entered.')
     spi = busio.SPI(board.SCK, board.MOSI, board.MISO)
@@ -75,23 +88,25 @@ def user_add():
             card = [hex(i) for i in uid]
             time.sleep(2)
 
-        today = date.today()
+#        today = date.today()
+#        today = datetime.now()
+        now = datetime.now()
+        today = now.strftime("%d/%m/%Y %H:%M")
 
         mydb = mysql.connector.connect(
         host="localhost",
         user="root",
-        password="1234567",
+        password="!B7!v0??",
         database="codedb"
         )
 
         mycursor = mydb.cursor()
 
         print("Connected")
-        time.sleep(2)
+        time.sleep(1)
         print(card)
-        print()
         print(today)
-        time.sleep(3)
+        time.sleep(1)
 
         try:
             sql = f'INSERT INTO accessc (first, last, card, created, active) VALUES ("{fname}", "{lname}", "{card}", "{today}", "{today}")'
@@ -99,7 +114,7 @@ def user_add():
         except Exception as e:
             print(e)
             logging.info(f'{e}')
-            time.sleep(3)
+            time.sleep(2)
             os.system('clear')
             break
         mydb.commit()
@@ -115,11 +130,12 @@ def delete():
     name = input("> ")
 
 def lock():
+    logging.info("Lock has been manually triggered.")
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(12, GPIO.OUT)
     GPIO.output(12, GPIO.HIGH)
     print("Lock is open")
-    time.sleep(3)
+    time.sleep(5)
     os.system("clear")
     GPIO.output(12, GPIO.LOW)
     print("Lock is closed")
@@ -128,7 +144,27 @@ def lock():
 
 
 def schedule():
+    # whats the frequency kenneth
+    utime = input("Unlock time ex.13:30> ")
+    ltime = input("Lock time ex.9:15> ")
 
+    #take users time input and split it
+    htime,mtime = utime.split(':')
+    Htime,Mtime = ltime.split(':')
+
+    with CronTab(user='accessc') as cron:
+        # pulse to unlock
+        job = cron.new(command='python3 ~/Documents/pulseulock.py')
+        job.hour.on(htime)
+        job.minute.on(mtime)
+        # pulse to lock
+        job = cron.new(command='python3 ~/Documents/pulselock.py')
+        job.hour.on(Htime)
+        job.minute.on(Mtime)
+    cron.write()
+    print("Job has been scheduled")
+    logging.info(f'{utime, ltime} unlock/lock schedule set.')
+    time.sleep(3)
 
 
 
