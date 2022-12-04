@@ -2,7 +2,6 @@
 
 #Ram
 #10 sep 2022
-#rogue7.ram@gmail.com
 #My attempt at an access control system.
 
 
