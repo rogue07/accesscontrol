@@ -8,6 +8,10 @@ pip3 install --upgrade setuptools
 
 pip3 install --upgrade adafruit-python-shell
 
+pip3 install schedule
+
+pip install python-crontab
+
 pip install adafruit-circuitpython-pn532
 
 pip3 install sh
