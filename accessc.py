@@ -95,7 +95,7 @@ def user_add():
         mydb = mysql.connector.connect(
         host="localhost",
         user="root",
-        password="!B7!v0??",
+        password="!12345?",
         database="codedb"
         )
 
