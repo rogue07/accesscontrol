@@ -89,7 +89,7 @@ def user_add():
         today = now.strftime("%d/%m/%Y %H:%M")
 
         mydb = mysql.connector.connect(
-            host="localhost", user="root", password="!B7!v0??", database="codedb"
+            host="localhost", user="root", password="!12345??", database="codedb"
         )
 
         mycursor = mydb.cursor()
