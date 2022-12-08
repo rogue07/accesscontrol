@@ -1,27 +1,14 @@
-sudo apt-get update -y
+#!/bin/bash
 
-sudo apt-get upgrade -y
-
-sudo apt-get install python3-pip -y
-
-pip3 install --upgrade setuptools
-
-pip3 install --upgrade adafruit-python-shell
-
-pip3 install schedule
-
-pip install python-crontab
-
-pip install adafruit-circuitpython-pn532
-
-pip3 install sh
-
-pip install keyboard
-
-sudo apt install unixodbc-dev -y
-
-pip install mysql-connector-python
-
-pip3 install mariadb
-
-sudo apt install mariadb-server -y
+# Install all necessary packages & python libraries for access control
+sudo apt update -y; sudo apt upgrade
+sudo apt install mariadb-server \
+    python3-pip \
+    unixodbc-dev
+pip3 install adafruit-circuitpython-pn532 \
+    mysql-connector-python \
+    python-crontab \
+    mariadb \
+    sh
+pip3 install --upgrade adafruit-python-shell \
+    setuptools
