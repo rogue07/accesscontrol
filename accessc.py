@@ -2,6 +2,7 @@
 
 #Ram
 #10 sep 2022
+#rogue7.ram@gmail.com
 #My attempt at an access control system.
 
 
@@ -21,16 +22,14 @@ from adafruit_pn532.spi import PN532_SPI
 from sh import tail
 from datetime import datetime
 from crontab import CronTab
-
 import os.path
 
-# file to check
-logfile = 'accessc.log'
 
+# check logfile size, it over 1,000,000 then purge
+logfile = 'accessc.log'
 os.system('clear')
 sz = os.path.getsize(logfile)
 print(f'The {logfile} size is', sz, 'bytes')
-time.sleep(3)
 
 
 # log to accessc.log
@@ -95,7 +94,7 @@ def user_add():
         mydb = mysql.connector.connect(
         host="localhost",
         user="root",
-        password="!12345?",
+        password="!B7!v0??",
         database="codedb"
         )
 
@@ -125,8 +124,30 @@ def user_add():
     
 # delete user and card functiin
 def delete():
-    print("Enter users name")
-    name = input("> ")
+    mydb = mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="!B7!v0??",
+        database="codedb"
+        )
+
+    mycursor = mydb.cursor()
+    mycursor.execute("SELECT first, last FROM accessc")
+    myresult = mycursor.fetchall()
+
+    for x in myresult:
+        print(x)
+
+    name = input("Delete user  enter first name> ")
+    sql = f'DELETE FROM accessc WHERE first=("{name}")'
+    mycursor.execute(sql)
+
+    mydb.commit()
+    logging.info(f'{name} has been deleted from database')
+    print(mycursor.rowcount, "record(s) deleted")
+    time.sleep(3)
+
+
 
 def lock():
     logging.info("Lock has been manually triggered.")
@@ -144,6 +165,7 @@ def lock():
 
 def schedule():
     # whats the frequency kenneth
+    note = input("Note ex.unlock schedule> ")
     utime = input("Unlock time ex.13:30> ")
     ltime = input("Lock time ex.9:15> ")
 
@@ -154,10 +176,12 @@ def schedule():
     with CronTab(user='accessc') as cron:
         # pulse to unlock
         job = cron.new(command='python3 ~/Documents/pulseulock.py')
+        job.set_comment(note)
         job.hour.on(htime)
         job.minute.on(mtime)
         # pulse to lock
         job = cron.new(command='python3 ~/Documents/pulselock.py')
+        job.set_comment(note)
         job.hour.on(Htime)
         job.minute.on(Mtime)
     cron.write()
@@ -192,6 +216,7 @@ while True:
         print("You choose to delete a user and card")
         time.sleep(2)
         os.system('clear')
+        delete()
     elif number == "3":
         print("Test lock")
         time.sleep(2)
@@ -210,7 +235,6 @@ while True:
         log()
     elif number == "6":
         print("Exiting")
-        time.sleep(2)
         os.system('clear')
         quit()
     elif number == "_":
