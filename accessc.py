@@ -142,6 +142,7 @@ def lock():
 
 def schedule():
     # whats the frequency kenneth
+    note = input("Note ex.unlock schedule> ")
     utime = input("Unlock time ex.13:30> ")
     ltime = input("Lock time ex.9:15> ")
 
