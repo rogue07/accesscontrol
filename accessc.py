@@ -1,4 +1,12 @@
+<<<<<<< HEAD
 """My attempt at an access control system."""
+=======
+#!/usr/bin/python3
+
+# Ram
+# 10 sep 2022
+# My attempt at an access control system.
+>>>>>>> 742df707e8599e1fb998443156cee286c718a1ec
 
 
 from adafruit_pn532.spi import PN532_SPI
@@ -21,6 +29,11 @@ os.system("clear")
 logsize = os.path.getsize(logfile)
 print(f"The {logfile} size is {logsize} bytes")
 time.sleep(3)
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> 742df707e8599e1fb998443156cee286c718a1ec
 logging.basicConfig(
     filename=logfile,
     format="%(asctime)s %(levelname)-8s %(message)s",
@@ -88,6 +101,15 @@ def user_add():
         now = datetime.now()
         today = now.strftime("%d/%m/%Y %H:%M")
 
+<<<<<<< HEAD
+=======
+        mydb = mysql.connector.connect(
+            host="localhost", user="root", password="!B7!v0??", database="codedb"
+        )
+
+        mycursor = mydb.cursor()
+
+>>>>>>> 742df707e8599e1fb998443156cee286c718a1ec
         print("Connected")
         time.sleep(1)
         print(card)
@@ -114,6 +136,7 @@ def user_add():
         break
 
 
+<<<<<<< HEAD
 def delete_user():
     mycursor.execute("SELECT first, last FROM accessc")
     myresult = mycursor.fetchall()
@@ -126,6 +149,12 @@ def delete_user():
     logging.info(f"{name} has been deleted from database")
     print(f"{mycursor.rowcount} record(s) deleted")
     time.sleep(3)
+=======
+def delete():
+    """delete user and card function"""
+    print("Enter users name")
+    name = input("> ")
+>>>>>>> 742df707e8599e1fb998443156cee286c718a1ec
 
 
 def lock():
@@ -159,9 +188,14 @@ def schedule():
         job.minute.on(unlock_minute)
         # pulse to lock
         job = cron.new(command="python3 ~/Documents/pulselock.py")
+<<<<<<< HEAD
         job.set_comment(note)
         job.hour.on(lock_hour)
         job.minute.on(lock_minute)
+=======
+        job.hour.on(Htime)
+        job.minute.on(Mtime)
+>>>>>>> 742df707e8599e1fb998443156cee286c718a1ec
     cron.write()
     print("Job has been scheduled")
     logging.info(f"{unlock_time, lock_time} unlock/lock schedule set.")
@@ -184,6 +218,7 @@ def main():
     """Main loop to choose an option like adf user and card, view live logs..."""
     while True:
         os.system("clear")
+<<<<<<< HEAD
         menu()
         number = input(">  ")
         if number == "1":
@@ -224,3 +259,35 @@ def main():
 
 if __name__ == "__main__":
     main()
+=======
+        user_add()
+        os.system("clear")
+    if number == "2":
+        print("You choose to delete a user and card")
+        time.sleep(2)
+        os.system("clear")
+    if number == "3":
+        print("Test lock")
+        time.sleep(2)
+        os.system("clear")
+        lock()
+    if number == "4":
+        print("schedule")
+        time.sleep(2)
+        os.system("clear")
+        schedule()
+    if number == "5":
+        print("View live log")
+        print("Ctl+c will exit live log")
+        time.sleep(4)
+        os.system("clear")
+        log()
+    if number == "6":
+        print("Exiting")
+        time.sleep(2)
+        os.system("clear")
+        sys.exit(0)
+    print("Choose a correct number.")
+    time.sleep(2)
+    os.system("clear")
+>>>>>>> 742df707e8599e1fb998443156cee286c718a1ec
