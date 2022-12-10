@@ -2,6 +2,10 @@
 
 Access control project
 
+* Ram
+* 10 sep 2022
+* rogue7.ram@gmail.com
+
 This projects goal is to be able to use NFC fobs or cards to trigger a relay and open
 a lock.
 

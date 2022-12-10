@@ -1,8 +1,4 @@
-#!/usr/bin/python3
-
-# Ram
-# 10 sep 2022
-# My attempt at an access control system.
+"""My attempt at an access control system."""
 
 
 from adafruit_pn532.spi import PN532_SPI
@@ -21,19 +17,23 @@ import sys
 import time
 
 logfile = "accessc.log"
-
 os.system("clear")
-sz = os.path.getsize(logfile)
-print(f"The {logfile} size is {sz} bytes")
+logsize = os.path.getsize(logfile)
+print(f"The {logfile} size is {logsize} bytes")
 time.sleep(3)
-
-
 logging.basicConfig(
     filename=logfile,
     format="%(asctime)s %(levelname)-8s %(message)s",
     level=logging.INFO,
     datefmt="%Y-%m-%d %H:%M:%S",
 )
+mydb = mysql.connector.connect(
+    host="localhost",
+    user="root",
+    password="!B7!v0??",
+    database="codedb",
+)
+mycursor = mydb.cursor()
 
 
 def menu():
@@ -51,25 +51,25 @@ def menu():
 
 def user_add():
     """Add user and associate a card with then and save to db.csv"""
-    fname = input("Enter First name: ").lower()
-    if fname == "":
+    first_name = input("Enter First name: ").lower()
+    if first_name == "":
         print("Name can not be blank")
         time.sleep(3)
         return
     else:
-        print(fname)
+        print(first_name)
         time.sleep(1)
 
-    lname = input("Enter last name: ").lower()
-    if fname == "":
+    last_name = input("Enter last name: ").lower()
+    if first_name == "":
         print("Name can not be blank")
         time.sleep(3)
         return
     else:
-        print(lname)
+        print(last_name)
         time.sleep(1)
 
-    logging.info(f"{fname, lname} was entered.")
+    logging.info(f"{first_name, last_name} was entered.")
     spi = busio.SPI(board.SCK, board.MOSI, board.MISO)
     cs_pin = DigitalInOut(board.D5)
     pn532 = PN532_SPI(spi, cs_pin, debug=False)
@@ -88,12 +88,6 @@ def user_add():
         now = datetime.now()
         today = now.strftime("%d/%m/%Y %H:%M")
 
-        mydb = mysql.connector.connect(
-            host="localhost", user="root", password="!B7!v0??", database="codedb"
-        )
-
-        mycursor = mydb.cursor()
-
         print("Connected")
         time.sleep(1)
         print(card)
@@ -102,8 +96,8 @@ def user_add():
 
         try:
             sql = (
-                f"INSERT INTO accessc (first, last, card, created, active) VALUES "
-                + f"""("{fname}", "{lname}", "{card}", "{today}", "{today}")"""
+                "INSERT INTO accessc (first, last, card, created, active) VALUES "
+                + f"('{first_name}', '{last_name}', '{card}', '{today}', '{today}')"
             )
             mycursor.execute(sql)
         except Exception as e:
@@ -114,16 +108,24 @@ def user_add():
             break
         mydb.commit()
         print(mycursor.rowcount, "record inserted.")
-        logging.info(f"{fname, lname} and card have been written to database.")
+        logging.info(f"{first_name, last_name} and card have been written to database.")
         time.sleep(2)
         os.system("clear")
         break
 
 
-def delete():
-    """delete user and card function"""
-    print("Enter users name")
-    name = input("> ")
+def delete_user():
+    mycursor.execute("SELECT first, last FROM accessc")
+    myresult = mycursor.fetchall()
+    for x in myresult:
+        print(x)
+    name = input("To delete a user, enter their first name> ")
+    sql = f"DELETE FROM accessc WHERE first = ('{name}')"
+    mycursor.execute(sql)
+    mydb.commit()
+    logging.info(f"{name} has been deleted from database")
+    print(f"{mycursor.rowcount} record(s) deleted")
+    time.sleep(3)
 
 
 def lock():
@@ -142,30 +144,32 @@ def lock():
 
 def schedule():
     # whats the frequency kenneth
-    utime = input("Unlock time ex.13:30> ")
-    ltime = input("Lock time ex.9:15> ")
-
+    note = input("Note ex.unlock schedule> ")
+    unlock_time = input("Unlock time ex.13:30> ")
+    lock_time = input("Lock time ex.9:15> ")
     # take users time input and split it
-    htime, mtime = utime.split(":")
-    Htime, Mtime = ltime.split(":")
+    unlock_hour, unlock_minute = unlock_time.split(":")
+    lock_hour, lock_minute = lock_time.split(":")
 
     with CronTab(user="accessc") as cron:
         # pulse to unlock
         job = cron.new(command="python3 ~/Documents/pulseulock.py")
-        job.hour.on(htime)
-        job.minute.on(mtime)
+        job.set_comment(note)
+        job.hour.on(unlock_hour)
+        job.minute.on(unlock_minute)
         # pulse to lock
         job = cron.new(command="python3 ~/Documents/pulselock.py")
-        job.hour.on(Htime)
-        job.minute.on(Mtime)
+        job.set_comment(note)
+        job.hour.on(lock_hour)
+        job.minute.on(lock_minute)
     cron.write()
     print("Job has been scheduled")
-    logging.info(f"{utime, ltime} unlock/lock schedule set.")
+    logging.info(f"{unlock_time, lock_time} unlock/lock schedule set.")
     time.sleep(3)
 
 
 def log():
-    """Logging function that shiwe a live view logs to accessc.log. It used ctl+c to
+    """Logging function that shows a live view logs to accessc.log. It uses ctrl+c to
     exit the live view."""
     try:
         while True:
@@ -176,41 +180,47 @@ def log():
         return
 
 
-# Main loop to choose an option like adf user and card, view live logs...
-while True:
-    os.system("clear")
-    menu()
-    number = input(">  ")
-    if number == "1":
+def main():
+    """Main loop to choose an option like adf user and card, view live logs..."""
+    while True:
+        os.system("clear")
+        menu()
+        number = input(">  ")
+        if number == "1":
+            time.sleep(2)
+            os.system("clear")
+            user_add()
+            os.system("clear")
+        if number == "2":
+            print("You choose to delete a user and card")
+            time.sleep(2)
+            os.system("clear")
+            delete_user()
+        if number == "3":
+            print("Test lock")
+            time.sleep(2)
+            os.system("clear")
+            lock()
+        if number == "4":
+            print("schedule")
+            time.sleep(2)
+            os.system("clear")
+            schedule()
+        if number == "5":
+            print("View live log")
+            print("Ctl+c will exit live log")
+            time.sleep(4)
+            os.system("clear")
+            log()
+        if number == "6":
+            print("Exiting")
+            time.sleep(2)
+            os.system("clear")
+            sys.exit(0)
+        print("Choose a correct number.")
         time.sleep(2)
         os.system("clear")
-        user_add()
-        os.system("clear")
-    if number == "2":
-        print("You choose to delete a user and card")
-        time.sleep(2)
-        os.system("clear")
-    if number == "3":
-        print("Test lock")
-        time.sleep(2)
-        os.system("clear")
-        lock()
-    if number == "4":
-        print("schedule")
-        time.sleep(2)
-        os.system("clear")
-        schedule()
-    if number == "5":
-        print("View live log")
-        print("Ctl+c will exit live log")
-        time.sleep(4)
-        os.system("clear")
-        log()
-    if number == "6":
-        print("Exiting")
-        time.sleep(2)
-        os.system("clear")
-        sys.exit(0)
-    print("Choose a correct number.")
-    time.sleep(2)
-    os.system("clear")
+
+
+if __name__ == "__main__":
+    main()
