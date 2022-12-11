@@ -1,58 +1,58 @@
 #!/usr/bin/python3
 
-# Ram
-# 10 sep 2022
-# My attempt at an access control system.
+#Ram
+#10 sep 2022
+#rogue7.ram@gmail.com
+#My attempt at an access control system.
 
 
-from adafruit_pn532.spi import PN532_SPI
+import logging
+import os 
+import time
+import sys
 import board
 import busio
-from crontab import CronTab
-from datetime import datetime
-from digitalio import DigitalInOut
-import logging
+import subprocess
+import select
+import keyboard
 import mysql.connector
-import os
-import os.path
 import RPi.GPIO as GPIO
+from digitalio import DigitalInOut
+from adafruit_pn532.spi import PN532_SPI
 from sh import tail
-import sys
-import time
+from datetime import datetime
+from crontab import CronTab
+import os.path
 
-logfile = "accessc.log"
 
-os.system("clear")
+# check logfile size, it over 1,000,000 then purge
+logfile = 'accessc.log'
+os.system('clear')
 sz = os.path.getsize(logfile)
-print(f"The {logfile} size is {sz} bytes")
-time.sleep(3)
+print(f'The {logfile} size is', sz, 'bytes')
 
 
-logging.basicConfig(
-    filename=logfile,
-    format="%(asctime)s %(levelname)-8s %(message)s",
-    level=logging.INFO,
-    datefmt="%Y-%m-%d %H:%M:%S",
-)
+# log to accessc.log
+logging.basicConfig(filename="accessc.log", format='%(asctime)s %(levelname)-8s %(message)s', level=logging.INFO, datefmt='%Y-%m-%d %H:%M:%S')
 
 
+#logging.basicConfig(filename="accessc.log", level=logging.INFO)
+
+#Main menu
 def menu():
-    """Main menu"""
-    print(
-        """Choose an option:
-    1. Add User & Cards")
-    2. Delete User & Card")
-    3. Test lock")
-    4. Schedules")
-    5. View Live Log")
-    6. Quit"""
-    )
+    print("     Choose an option: ")
+    print("     1. Add User & Cards")
+    print("     2. Delete User & Card")
+    print("     3. Test lock")
+    print("     4. Schedules")
+    print("     5. View Live Log")
+    print("     6. Quit")
 
 
+#add user and associate a card with then and save to db.csv
 def user_add():
-    """Add user and associate a card with then and save to db.csv"""
-    fname = input("Enter First name: ").lower()
-    if fname == "":
+    fname = input('Enter First name: ').lower()
+    if fname == '':    
         print("Name can not be blank")
         time.sleep(3)
         return
@@ -60,8 +60,8 @@ def user_add():
         print(fname)
         time.sleep(1)
 
-    lname = input("Enter last name: ").lower()
-    if fname == "":
+    lname = input('Enter last name: ').lower()
+    if fname == '':    
         print("Name can not be blank")
         time.sleep(3)
         return
@@ -69,7 +69,7 @@ def user_add():
         print(lname)
         time.sleep(1)
 
-    logging.info(f"{fname, lname} was entered.")
+    logging.info(f'{fname, lname} was entered.')
     spi = busio.SPI(board.SCK, board.MOSI, board.MISO)
     cs_pin = DigitalInOut(board.D5)
     pn532 = PN532_SPI(spi, cs_pin, debug=False)
@@ -79,17 +79,23 @@ def user_add():
 
     while True:
         uid = pn532.read_passive_target(timeout=0.5)
-        if not uid:
+        if uid is None:
             continue
         else:
             print("Found card with UID:", [hex(i) for i in uid])
             card = [hex(i) for i in uid]
             time.sleep(2)
+
+#        today = date.today()
+#        today = datetime.now()
         now = datetime.now()
         today = now.strftime("%d/%m/%Y %H:%M")
 
         mydb = mysql.connector.connect(
-            host="localhost", user="root", password="!12345??", database="codedb"
+        host="localhost",
+        user="root",
+        password="!B7!v0??",
+        database="codedb"
         )
 
         mycursor = mydb.cursor()
@@ -101,30 +107,54 @@ def user_add():
         time.sleep(1)
 
         try:
-            sql = (
-                f"INSERT INTO accessc (first, last, card, created, active) VALUES "
-                + f"""("{fname}", "{lname}", "{card}", "{today}", "{today}")"""
-            )
+            sql = f'INSERT INTO accessc (first, last, card, created, active) VALUES ("{fname}", "{lname}", "{card}", "{today}", "{today}")'
             mycursor.execute(sql)
         except Exception as e:
             print(e)
-            logging.info(f"{e}")
+            logging.info(f'{e}')
             time.sleep(2)
-            os.system("clear")
+            os.system('clear')
             break
         mydb.commit()
         print(mycursor.rowcount, "record inserted.")
-        logging.info(f"{fname, lname} and card have been written to database.")
+        logging.info(f'{fname, lname} and card have been written to database.')
         time.sleep(2)
-        os.system("clear")
+        os.system('clear')
         break
-
-
+    
+# delete user and card functiin
 def delete():
-    """delete user and card function"""
-    print("Enter users name")
-    name = input("> ")
+    mydb = mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="!B7!v0??",
+        database="codedb"
+        )
+    mycursor = mydb.cursor()
+#mycursor.execute("SELECT first, last FROM accessc")
 
+    mycursor.execute("SELECT ROW_NUMBER() OVER (ORDER BY first) row_num, first, last FROM accessc")
+    myresult = mycursor.fetchall()
+    for x in myresult:
+        print(x)
+
+    print()
+    print("------------------")
+    print("|   Delete user: |")
+    print("------------------\n")
+
+    fname = input("Enter first name> ")
+    lname = input("Enter last name> ")
+#mycursor.execute(f'SELECT * FROM accessc WHERE first "{fname}")'
+    query = """SELECT * FROM accessc WHERE first = %s AND last = %s"""
+    val = (fname, lname)
+
+#print(mycursor.execute(query, val))
+    mycursor.execute(query, val)
+    myresults = mycursor.fetchall()
+    for x in myresults:
+        print(x)
+    time.sleep(3)
 
 def lock():
     logging.info("Lock has been manually triggered.")
@@ -146,72 +176,75 @@ def schedule():
     utime = input("Unlock time ex.13:30> ")
     ltime = input("Lock time ex.9:15> ")
 
-    # take users time input and split it
-    htime, mtime = utime.split(":")
-    Htime, Mtime = ltime.split(":")
+    #take users time input and split it
+    htime,mtime = utime.split(':')
+    Htime,Mtime = ltime.split(':')
 
-    with CronTab(user="accessc") as cron:
+    with CronTab(user='accessc') as cron:
         # pulse to unlock
-        job = cron.new(command="python3 ~/Documents/pulseulock.py")
+        job = cron.new(command='python3 ~/Documents/pulseulock.py')
+        job.set_comment(note)
         job.hour.on(htime)
         job.minute.on(mtime)
         # pulse to lock
-        job = cron.new(command="python3 ~/Documents/pulselock.py")
+        job = cron.new(command='python3 ~/Documents/pulselock.py')
+        job.set_comment(note)
         job.hour.on(Htime)
         job.minute.on(Mtime)
     cron.write()
     print("Job has been scheduled")
-    logging.info(f"{utime, ltime} unlock/lock schedule set.")
+    logging.info(f'{utime, ltime} unlock/lock schedule set.')
     time.sleep(3)
 
 
+
+#logginn function that shiwe a live view logs to accessc.log. It used ctl+c to exit the live view.
 def log():
-    """Logging function that shiwe a live view logs to accessc.log. It used ctl+c to
-    exit the live view."""
     try:
         while True:
-            for line in tail("-f", logfile, _iter=True):
+            for line in tail("-f", "accessc.log", _iter=True):
                 print(line)
     except KeyboardInterrupt:
-        os.system("clear")
+        os.system('clear')
         return
 
 
 # Main loop to choose an option like adf user and card, view live logs...
 while True:
-    os.system("clear")
+    os.system('clear')
     menu()
     number = input(">  ")
     if number == "1":
         time.sleep(2)
-        os.system("clear")
+        os.system('clear')
         user_add()
-        os.system("clear")
-    if number == "2":
+        os.system('clear')
+    elif number == "2":
         print("You choose to delete a user and card")
         time.sleep(2)
-        os.system("clear")
-    if number == "3":
+        os.system('clear')
+        delete()
+    elif number == "3":
         print("Test lock")
         time.sleep(2)
-        os.system("clear")
+        os.system('clear')
         lock()
-    if number == "4":
+    elif number == "4":
         print("schedule")
         time.sleep(2)
-        os.system("clear")
+        os.system('clear')
         schedule()
-    if number == "5":
+    elif number == "5":
         print("View live log")
         print("Ctl+c will exit live log")
         time.sleep(4)
-        os.system("clear")
+        os.system('clear')
         log()
-    if number == "6":
+    elif number == "6":
         print("Exiting")
+        os.system('clear')
+        quit()
+    elif number == "_":
+        print("Choose a correct number.")
         time.sleep(2)
-        os.system("clear")
-        sys.exit(0)
-    print("Choose a correct number.")
-    time.sleep(2)
-    os.system("clear")
+        os.system('clear')
