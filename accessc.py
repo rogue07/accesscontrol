@@ -5,7 +5,7 @@
 #rogue7.ram@gmail.com
 #My attempt at an access control system.
 
-
+#import pulselock.py
 import logging
 import os 
 import time
@@ -23,7 +23,7 @@ from sh import tail
 from datetime import datetime
 from crontab import CronTab
 import os.path
-
+#import pulselock.py
 
 # check logfile size, it over 1,000,000 then purge
 logfile = 'accessc.log'
@@ -35,7 +35,6 @@ print(f'The {logfile} size is', sz, 'bytes')
 # log to accessc.log
 logging.basicConfig(filename="accessc.log", format='%(asctime)s %(levelname)-8s %(message)s', level=logging.INFO, datefmt='%Y-%m-%d %H:%M:%S')
 
-
 #logging.basicConfig(filename="accessc.log", level=logging.INFO)
 
 #Main menu
@@ -46,7 +45,8 @@ def menu():
     print("     3. Test lock")
     print("     4. Schedules")
     print("     5. View Live Log")
-    print("     6. Quit")
+    print("     6. Emergency")
+    print("     7. Quit")
 
 
 #add user and associate a card with then and save to db.csv
@@ -156,6 +156,14 @@ def delete():
         print(x)
     time.sleep(3)
 
+#    goodbye = f'DELETE FROM accessc WHERE first last "{fname, lname}"'
+#    mycursor.execute(goodbye)
+#    print(fname, lname, "has been deleted.")
+
+
+
+
+
 def lock():
     logging.info("Lock has been manually triggered.")
     GPIO.setmode(GPIO.BCM)
@@ -208,6 +216,24 @@ def log():
         os.system('clear')
         return
 
+# Emergency lock down of all locks
+def emergency():
+    menu = input("Lock/Unlock L/U > ").lower()
+    print(menu)
+    time.sleep(5)
+    if menu == "l":
+        print("Locking all locks.")
+        os.system('python3 emergencylock.py')
+        time.sleep(2)
+        return
+    elif menu == "u":
+        print("Returning to normal operation")  
+        os.system('python3 emergencyulock.py')
+        time.sleep(2)
+        return
+
+
+
 
 # Main loop to choose an option like adf user and card, view live logs...
 while True:
@@ -241,6 +267,10 @@ while True:
         os.system('clear')
         log()
     elif number == "6":
+        print("Emergency")
+        os.system("clear")
+        emergency()
+    elif number == "7":
         print("Exiting")
         os.system('clear')
         quit()
