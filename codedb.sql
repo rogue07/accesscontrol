@@ -23,14 +23,14 @@ DROP TABLE IF EXISTS `accessc`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `accessc` (
-  `first` varchar(20) DEFAULT NULL,
-  `last` varchar(20) DEFAULT NULL,
-  `card` varchar(32) DEFAULT NULL,
-  `created` varchar(25) DEFAULT NULL,
-  `active` varchar(25) DEFAULT NULL,
-  UNIQUE KEY `codedb_first_last` (`first`,`last`),
-  UNIQUE KEY `codedb_card` (`card`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `first` varchar(20) NOT NULL,
+  `last` varchar(20) NOT NULL,
+  `card` varchar(32) NOT NULL,
+  `creation` varchar(25) NOT NULL,
+  `access` varchar(25) NOT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -39,7 +39,7 @@ CREATE TABLE `accessc` (
 
 LOCK TABLES `accessc` WRITE;
 /*!40000 ALTER TABLE `accessc` DISABLE KEYS */;
-INSERT INTO `accessc` VALUES ('snoop','dogg','[\'0x2e\', \'0xc3\', \'0x74\', \'0x2a\']','04/12/2022 02:48','04/12/2022 02:48'),('shabba','ranks','[\'0x53\', \'0x7a\', \'0xbc\', \'0x29\']','04/12/2022 16:48','04/12/2022 16:48');
+INSERT INTO `accessc` VALUES (1,'al','bundy','[\'0x8e\', \'0xb0\', \'0xac\', \'0x2a\']','22/12/2022 23:51','22/12/2022 23:51'),(5,'feed','me','[\'0x2e\', \'0xc3\', \'0x74\', \'0x2a\']','23/12/2022 22:21','23/12/2022 22:21');
 /*!40000 ALTER TABLE `accessc` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -52,4 +52,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-12-05 19:21:18
+-- Dump completed on 2022-12-27 23:08:28
