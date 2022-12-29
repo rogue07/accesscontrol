@@ -6,6 +6,7 @@
 #My attempt at an access control system.
 
 #import pulselock.py
+import pdb
 import logging
 import os 
 import time
@@ -107,7 +108,7 @@ def user_add():
         time.sleep(1)
 
         try:
-            sql = f'INSERT INTO accessc (first, last, card, created, active) VALUES ("{fname}", "{lname}", "{card}", "{today}", "{today}")'
+            sql = f'INSERT INTO accessc (first, last, card, creation, access) VALUES ("{fname}", "{lname}", "{card}", "{today}", "{today}")'
             mycursor.execute(sql)
         except Exception as e:
             print(e)
@@ -133,7 +134,7 @@ def delete():
     mycursor = mydb.cursor()
 #mycursor.execute("SELECT first, last FROM accessc")
 
-    mycursor.execute("SELECT ROW_NUMBER() OVER (ORDER BY first) row_num, first, last FROM accessc")
+    mycursor.execute("SELECT ROW_NUMBER() OVER (ORDER BY first) user_id, first, last FROM accessc")
     myresult = mycursor.fetchall()
     for x in myresult:
         print(x)
@@ -146,19 +147,17 @@ def delete():
     fname = input("Enter first name> ")
     lname = input("Enter last name> ")
 #mycursor.execute(f'SELECT * FROM accessc WHERE first "{fname}")'
-    query = """SELECT * FROM accessc WHERE first = %s AND last = %s"""
-    val = (fname, lname)
+    mycursor.execute(f'SELECT * FROM accessc WHERE first = "{fname}" AND last = "{lname}"')
 
 #print(mycursor.execute(query, val))
-    mycursor.execute(query, val)
-    myresults = mycursor.fetchall()
-    for x in myresults:
-        print(x)
-    time.sleep(3)
+    mycursor.fetchone()
+    time.sleep(2)
 
-#    goodbye = f'DELETE FROM accessc WHERE first last "{fname, lname}"'
+    mycursor.execute(f'DELETE FROM accessc WHERE first = "{fname}" AND last = "{lname}"')
+    mydb.commit()
 #    mycursor.execute(goodbye)
-#    print(fname, lname, "has been deleted.")
+    print(fname, lname, "has been deleted.")
+    time.sleep(2)
 
 
 
