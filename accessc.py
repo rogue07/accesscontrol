@@ -24,13 +24,6 @@ from sh import tail
 from datetime import datetime
 from crontab import CronTab
 import os.path
-#import pulselock.py
-
-# check logfile size, it over 1,000,000 then purge
-logfile = 'accessc.log'
-os.system('clear')
-sz = os.path.getsize(logfile)
-print(f'The {logfile} size is', sz, 'bytes')
 
 
 # log to accessc.log
@@ -272,6 +265,11 @@ while True:
     elif number == "7":
         print("Exiting")
         os.system('clear')
+        # check logfile size, it over 1,000,000 then purge
+        logfile = 'accessc.log'
+        os.system('clear')
+        sz = os.path.getsize(logfile)
+        print(f'The {logfile} size is', sz, 'bytes')
         quit()
     elif number == "_":
         print("Choose a correct number.")
