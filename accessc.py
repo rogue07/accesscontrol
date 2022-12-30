@@ -2,10 +2,8 @@
 
 #Ram
 #10 sep 2022
-#rogue7.ram@gmail.com
 #My attempt at an access control system.
 
-#import pulselock.py
 import pdb
 import logging
 import os 
@@ -29,7 +27,6 @@ import os.path
 # log to accessc.log
 logging.basicConfig(filename="accessc.log", format='%(asctime)s %(levelname)-8s %(message)s', level=logging.INFO, datefmt='%Y-%m-%d %H:%M:%S')
 
-#logging.basicConfig(filename="accessc.log", level=logging.INFO)
 
 #Main menu
 def menu():
