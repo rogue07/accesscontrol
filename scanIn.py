@@ -46,16 +46,14 @@ while True:
     logging.info('Card was presented')
 
     mycursor.execute(f'SELECT * FROM accessc WHERE card = "{usercard}"')
-
     myresult = mycursor.fetchone()
+    
+    mycursor.execute(f'SELECT first, last FROM accessc WHERE card = "{usercard}"')
+    name = mycursor.fetchone()
+    
     print(bool(myresult))
     x = bool(myresult)
 
-    mycursor.execute(f'SELECT first, last FROM accessc WHERE card = "{usercard}"')
-    name = mycursor.fetchone()
-#    mycursor.execute(f'SELECT first FROM accessc WHERE card = "{usercard}"')
-#    fname = mycursor.fetchone()
-#    print(fname, lname)
     print(name)
     time.sleep(1)
     if x == True:
@@ -63,4 +61,4 @@ while True:
         logging.info(f'{name} Access successful')
     else:
         print("Failed access")
-        logging.info('{fname} {lname} Failed access')
+        logging.info('{name} Failed access')
