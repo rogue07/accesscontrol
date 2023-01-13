@@ -56,7 +56,7 @@ while True:
     mycursor.execute(f'SELECT first FROM accessc WHERE card = "{usercard}"')
     fname = mycursor.fetchone()
     print(fname, lname)
-
+    time.sleep(1)
     if x == True:
         print("Access successful")
         logging.info(f'{fname} {lname} Access successful')
