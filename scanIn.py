@@ -44,25 +44,22 @@ while True:
     usercard = [hex(i) for i in uid]
    
     logging.info('Card was presented')
-    time.sleep(5)
 
-    mycursor.execute(f'SELECT EXISTS(SELECT * FROM accessc WHERE card = "{usercard}") as OUTPUT')
+    mycursor.execute(f'SELECT * FROM accessc WHERE card = "{usercard}"')
+
     myresult = mycursor.fetchone()
-    print(myresult)
+    print(bool(myresult))
+    x = bool(myresult)
+
     mycursor.execute(f'SELECT last FROM accessc WHERE card = "{usercard}"')
     lname = mycursor.fetchone()
     mycursor.execute(f'SELECT first FROM accessc WHERE card = "{usercard}"')
     fname = mycursor.fetchone()
     print(fname, lname)
 
-    time.sleep(5)
-    
-
-    if myresult != (1,):
-        print("Access failed")
-        logging.info('Failed access')
-        time.sleep(2)
-    else:
+    if x == True:
         print("Access successful")
-        logging.info(f'{fname} {lname} successful access')
-        time.sleep(2)
+        logging.info(f'{fname} {lname} Access successful')
+    else:
+        print("Failed access")
+        logging.info('{fname} {lname} Failed access')
