@@ -19,7 +19,6 @@ from digitalio import DigitalInOut
 from sh import tail
 from PIL import ImageTk, Image
 from datetime import datetime
-from tkinter import *
 from tkinter import messagebox
 from crontab import CronTab
 
@@ -109,7 +108,7 @@ class AccessControlGUI:
 
 
 # loginto mariadb server
-def mariadb(self):
+def mariadb():
     mydb = mysql.connector.connect(
     host="localhost",
     user="accessc",
@@ -121,11 +120,25 @@ def mariadb(self):
 
 
 # Function for adding user and associated card
-def add_user(self):
+def add_user():
     print("")
     print("")
-    mydb = mariadb()
-    mycursor = mydb.cursor()
+
+    dialog = tk.Toplevel(self.master)
+    dialog.title("Add User")
+    label = tk.Label(dialog, text="Enter user's first and last name:")
+    label.pack(padx=10, pady=10)
+    entry = tk.Entry(dialog, width=30)
+    entry.pack(padx=10, pady=5)
+
+# Display the window as a modal dialog box and retrieve the user's input
+    fname_lname = sd.askstring("Add User", "Enter user's first and last name:", parent=dialog)
+
+# Check if the user entered a valid input
+    if fname_lname:
+        fname, lname = fname_lname.split()
+        mydb = mariadb()
+        mycursor = mydb.cursor()
     
     fname = input('Enter First name: ').lower()
     if fname == '':    
@@ -196,41 +209,41 @@ def add_user(self):
         logging.info(f'{fname, lname} and card have been written to database.')
         time.sleep(2)
         os.system('clear')
-        return
+        pass
         
         
 
 
-def delete_user(self):
+def delete_user():
         # Implement function
-    return
+    pass
     # Function for toggling relay to manually open/close lock
-def test_lock(self):
+def test_lock():
         # Implement function
-    return
+    pass
     # Function for creating a schedule using cron
     
 # Toggling relay to open and close the lock manually
-def lock(self):
+def lock():
     logging.info("Lock has been manually triggered.")
     os.system('python3 unlock.py')
-    return    
+    pass    
     
     
-def schedule(self):
+def schedule():
         # Implement function
-    return
+    pass
     # Function for viewing live log
-def view_log(self):
+def view_log():
         # Implement function
-    return
+    pass
     # Function for emergency lockdown of the lock
-def emergency(self):
+def emergency():
         # Implement function
-    return
+    pass
     # Function for viewing data in all tables
-def view_user_info(self):
-    return
+def view_user_info():
+    pass
 
 
 def main():
