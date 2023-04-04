@@ -121,10 +121,7 @@ def mariadb():
 
 # Function for adding user and associated card
 def add_user():
-    print("")
-    print("")
-
-    dialog = tk.Toplevel(self.master)
+    dialog = tk.Toplevel()
     dialog.title("Add User")
     label = tk.Label(dialog, text="Enter user's first and last name:")
     label.pack(padx=10, pady=10)
