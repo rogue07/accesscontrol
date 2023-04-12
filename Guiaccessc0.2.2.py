@@ -131,7 +131,7 @@ def get_input(dialog, entry1, entry2, master):
         logging.info(f'{fname, lname} and card have been written to database.')
         time.sleep(2)
         os.system('clear')
-        pass
+#        pass
         
         
         
